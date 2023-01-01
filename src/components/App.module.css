@@ -6,3 +6,9 @@
   width: max-content;
   margin: 20px auto;
 }
+
+.error {
+  text-align: center;
+  font-size: 20px;
+  font-weight: 600;
+}

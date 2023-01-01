@@ -7,7 +7,7 @@ const getImage = axios.create({
     image_type: 'photo',
     orientation: 'horizontal',
     key: API_KEY,
-    per_page: '4',
+    per_page: '15',
   },
 });
 

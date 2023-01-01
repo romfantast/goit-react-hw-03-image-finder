@@ -4,8 +4,8 @@ import { ThreeDots } from 'react-loader-spinner';
 import Searchbar from './Searchbar/Searchbar';
 import ImageGallery from './ImageGallery/ImageGallery';
 import Button from './Button/Button';
+import Modal from './Modal/Modal';
 import css from './App.module.css';
-
 import { axiosGetImage } from 'pixabay-api/pixabay-api';
 
 const FETCH_STATUS = {
@@ -20,19 +20,22 @@ export default class App extends Component {
     images: [],
     query: '',
     page: 1,
+    isOpenModal: false,
+    activePhoto: null,
     totalPages: null,
     status: FETCH_STATUS.Idle,
   };
 
+  imagesBlockRef = React.createRef();
+
   async componentDidUpdate(_, prevState) {
     const { query, page } = this.state;
+    this.scrollToBottom();
 
     if (prevState.page !== this.state.page) {
       this.setState({ status: FETCH_STATUS.Pending });
-
       try {
         const { data } = await axiosGetImage(query, page);
-        console.log(data);
         this.setState(prevState => ({
           images: [...prevState.images, ...data.hits],
           page,
@@ -43,6 +46,9 @@ export default class App extends Component {
       }
     }
   }
+  scrollToBottom = () => {
+    this.imagesBlockRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   formSubmitHandler = async value => {
     const { page } = this.state;
@@ -50,15 +56,14 @@ export default class App extends Component {
     if (value) {
       try {
         const { data } = await axiosGetImage(value, page);
-        console.log(data);
         this.setState({
           images: [...data.hits],
           status: FETCH_STATUS.Resolved,
           page: 1,
           query: value,
+          totalPages: Math.ceil(data.totalHits / 15),
         });
       } catch (error) {
-        console.log(error);
         this.setState({ status: FETCH_STATUS.Rejected });
       }
     } else {
@@ -71,17 +76,33 @@ export default class App extends Component {
     this.setState(prev => ({ page: prev.page + 1 }));
   };
 
+  handleToggleModal = activePhoto => {
+    this.setState(prev => ({ isOpenModal: !prev.isOpenModal, activePhoto }));
+  };
+
   render() {
-    const { formSubmitHandler, handleLoadMore } = this;
-    const { images, status } = this.state;
+    const { formSubmitHandler, handleLoadMore, handleToggleModal } = this;
+    const { images, status, isOpenModal, activePhoto, totalPages, page } =
+      this.state;
     return (
       <>
         <Searchbar formSubmitHandler={formSubmitHandler} />
-        {images.length ? (
+        {status === FETCH_STATUS.Resolved && (
           <>
-            <ImageGallery imagesList={images} />
+            <ImageGallery imagesList={images} onOpenModal={handleToggleModal} />
+            {isOpenModal && (
+              <Modal
+                modalPhoto={activePhoto}
+                onToggleModal={handleToggleModal}
+              />
+            )}
           </>
-        ) : null}
+        )}
+
+        {status === FETCH_STATUS.Rejected && (
+          <p className={css.error}>Something went wrong...</p>
+        )}
+
         {status === FETCH_STATUS.Pending && (
           <div className={css.loader}>
             <ThreeDots
@@ -97,9 +118,12 @@ export default class App extends Component {
           </div>
         )}
 
-        {status === FETCH_STATUS.Resolved && (
+        {status === FETCH_STATUS.Resolved && page !== totalPages && (
           <div className={css.btnLoadMoreWrapper}>
-            <Button onLoadMore={handleLoadMore}>Load More</Button>
+            <Button ref={this.listRef} onLoadMore={handleLoadMore}>
+              Load More
+            </Button>
+            <div ref={this.imagesBlockRef} />
           </div>
         )}
       </>

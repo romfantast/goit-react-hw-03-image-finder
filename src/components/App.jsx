@@ -5,8 +5,8 @@ import Searchbar from './Searchbar/Searchbar';
 import ImageGallery from './ImageGallery/ImageGallery';
 import Button from './Button/Button';
 import Modal from './Modal/Modal';
-import css from './App.module.css';
 import { axiosGetImage } from 'pixabay-api/pixabay-api';
+import css from './App.module.css';
 
 const FETCH_STATUS = {
   Idle: 'idle',
@@ -47,7 +47,7 @@ export default class App extends Component {
 
     if (
       prevState.images.length < this.state.images.length ||
-      prevState.images[0].id !== this.state.images[0].id
+      prevState.images[0]?.id !== this.state.images[0]?.id
     ) {
       this.scrollToBottom();
     }

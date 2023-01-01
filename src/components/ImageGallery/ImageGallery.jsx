@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
-import css from './ImageGallery.module.css';
+import PropTypes from 'prop-types';
 import ImageGalleryItem from 'components/ImageGalleryItem/ImageGalleryItem';
+import css from './ImageGallery.module.css';
 
 export default class ImageGallery extends Component {
   render() {
@@ -21,3 +22,14 @@ export default class ImageGallery extends Component {
     );
   }
 }
+
+ImageGallery.propTypes = {
+  imagesList: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      webformatURL: PropTypes.string.isRequired,
+      largeImageURL: PropTypes.string.isRequired,
+    }).isRequired
+  ),
+  onOpenModal: PropTypes.func.isRequired,
+};

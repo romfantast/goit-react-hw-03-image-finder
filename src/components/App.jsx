@@ -64,7 +64,7 @@ export default class App extends Component {
         const { data } = await axiosGetImage(value, page);
         if (!data.hits.length) {
           this.setState({ status: FETCH_STATUS.Rejected, images: [] });
-          return Notify.info('There are no images with this query');
+          return Notify.info('There are no images with this search string');
         }
 
         this.setState({
@@ -79,7 +79,7 @@ export default class App extends Component {
       }
     } else {
       this.setState({ status: FETCH_STATUS.Rejected });
-      Notify.warning('Please enter a valid query');
+      Notify.warning('Please enter a valid search string');
     }
   };
 
@@ -112,7 +112,7 @@ export default class App extends Component {
 
         {status === FETCH_STATUS.Rejected && (
           <p className={css.error}>
-            Something went wrong... Check the info above and try again :/
+            Something went wrong...Check the info above and try again :/
           </p>
         )}
 

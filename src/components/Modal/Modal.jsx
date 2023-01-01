@@ -4,12 +4,12 @@ import css from './Modal.module.css';
 export default class Modal extends Component {
   componentDidMount() {
     window.addEventListener('keydown', this.handleKeyDown);
-    //  document.body.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
   }
 
   componentWillUnmount() {
     window.removeEventListener('keydown', this.handleKeyDown);
-    //  document.body.style.overflow = 'unset';
+    document.body.style.overflow = 'auto';
   }
 
   handleKeyDown = e => {

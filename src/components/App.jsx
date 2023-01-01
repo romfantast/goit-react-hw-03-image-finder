@@ -30,7 +30,6 @@ export default class App extends Component {
 
   async componentDidUpdate(_, prevState) {
     const { query, page } = this.state;
-    this.scrollToBottom();
 
     if (prevState.page !== this.state.page) {
       this.setState({ status: FETCH_STATUS.Pending });
@@ -44,6 +43,10 @@ export default class App extends Component {
       } catch (error) {
         this.setState({ status: FETCH_STATUS.Rejected });
       }
+    }
+
+    if (prevState.images.length < this.state.images.length) {
+      this.scrollToBottom();
     }
   }
   scrollToBottom = () => {
@@ -87,7 +90,7 @@ export default class App extends Component {
     return (
       <>
         <Searchbar formSubmitHandler={formSubmitHandler} />
-        {status === FETCH_STATUS.Resolved && (
+        {(status === FETCH_STATUS.Resolved || page > 1) && (
           <>
             <ImageGallery imagesList={images} onOpenModal={handleToggleModal} />
             {isOpenModal && (

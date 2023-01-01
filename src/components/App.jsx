@@ -45,7 +45,10 @@ export default class App extends Component {
       }
     }
 
-    if (prevState.images.length < this.state.images.length) {
+    if (
+      prevState.images.length < this.state.images.length ||
+      prevState.images[0].id !== this.state.images[0].id
+    ) {
       this.scrollToBottom();
     }
   }

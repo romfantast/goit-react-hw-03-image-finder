@@ -62,6 +62,11 @@ export default class App extends Component {
     if (value) {
       try {
         const { data } = await axiosGetImage(value, page);
+        if (!data.hits.length) {
+          this.setState({ status: FETCH_STATUS.Rejected, images: [] });
+          return Notify.info('There are no images with this query');
+        }
+
         this.setState({
           images: [...data.hits],
           status: FETCH_STATUS.Resolved,
@@ -106,7 +111,9 @@ export default class App extends Component {
         )}
 
         {status === FETCH_STATUS.Rejected && (
-          <p className={css.error}>Something went wrong...</p>
+          <p className={css.error}>
+            Something went wrong... Check the info above and try again :/
+          </p>
         )}
 
         {status === FETCH_STATUS.Pending && (
@@ -124,14 +131,16 @@ export default class App extends Component {
           </div>
         )}
 
-        {status === FETCH_STATUS.Resolved && page !== totalPages && (
-          <div className={css.btnLoadMoreWrapper}>
-            <Button ref={this.listRef} onLoadMore={handleLoadMore}>
-              Load More
-            </Button>
-            <div ref={this.imagesBlockRef} />
-          </div>
-        )}
+        {status === FETCH_STATUS.Resolved &&
+          page !== totalPages &&
+          images.length !== 0 && (
+            <div className={css.btnLoadMoreWrapper}>
+              <Button ref={this.listRef} onLoadMore={handleLoadMore}>
+                Load More
+              </Button>
+              <div ref={this.imagesBlockRef} />
+            </div>
+          )}
       </>
     );
   }

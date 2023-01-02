@@ -34,7 +34,6 @@ export default class App extends Component {
       this.setState({ status: FETCH_STATUS.Pending });
       try {
         const { data } = await axiosGetImage(query, page);
-        console.log(data);
         if (!data.total) {
           this.setState({ status: FETCH_STATUS.Rejected });
           return Notify.info('There are no images with this search string');

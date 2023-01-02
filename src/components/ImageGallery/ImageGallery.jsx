@@ -5,13 +5,12 @@ import css from './ImageGallery.module.css';
 
 export default class ImageGallery extends Component {
   render() {
-    const { imagesList, onOpenModal } = this.props;
+    const { imagesList } = this.props;
 
     return (
       <ul className={css.ImageGallery}>
         {imagesList.map(image => (
           <ImageGalleryItem
-            onOpenModal={onOpenModal}
             key={image.id}
             id={image.id}
             webFormat={image.webformatURL}
@@ -31,5 +30,4 @@ ImageGallery.propTypes = {
       largeImageURL: PropTypes.string.isRequired,
     }).isRequired
   ),
-  onOpenModal: PropTypes.func.isRequired,
 };

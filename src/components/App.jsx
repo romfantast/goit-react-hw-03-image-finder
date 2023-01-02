@@ -1,12 +1,11 @@
 import React, { Component } from 'react';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
-import { ThreeDots } from 'react-loader-spinner';
 import Searchbar from './Searchbar/Searchbar';
 import ImageGallery from './ImageGallery/ImageGallery';
 import Button from './Button/Button';
-import Modal from './Modal/Modal';
 import { axiosGetImage } from 'pixabay-api/pixabay-api';
 import css from './App.module.css';
+import Loader from './Loader/Loader';
 
 const FETCH_STATUS = {
   Idle: 'idle',
@@ -20,8 +19,6 @@ export default class App extends Component {
     images: [],
     query: '',
     page: 1,
-    isOpenModal: false,
-    activePhoto: null,
     totalPages: null,
     status: FETCH_STATUS.Idle,
   };
@@ -30,25 +27,30 @@ export default class App extends Component {
 
   async componentDidUpdate(_, prevState) {
     const { query, page } = this.state;
-
-    if (prevState.page !== this.state.page) {
+    if (
+      prevState.page !== this.state.page ||
+      prevState.query !== this.state.query
+    ) {
       this.setState({ status: FETCH_STATUS.Pending });
       try {
         const { data } = await axiosGetImage(query, page);
+        console.log(data);
+        if (!data.total) {
+          this.setState({ status: FETCH_STATUS.Rejected });
+          return Notify.info('There are no images with this search string');
+        }
         this.setState(prevState => ({
           images: [...prevState.images, ...data.hits],
           page,
           status: FETCH_STATUS.Resolved,
+          totalPages: Math.ceil(data.totalHits / 15),
         }));
       } catch (error) {
         this.setState({ status: FETCH_STATUS.Rejected });
       }
     }
 
-    if (
-      prevState.images.length < this.state.images.length ||
-      prevState.images[0]?.id !== this.state.images[0]?.id
-    ) {
+    if (prevState.images.length < this.state.images.length) {
       this.scrollToBottom();
     }
   }
@@ -57,30 +59,14 @@ export default class App extends Component {
   };
 
   formSubmitHandler = async value => {
-    const { page } = this.state;
-    this.setState({ status: FETCH_STATUS.Pending });
-    if (value) {
-      try {
-        const { data } = await axiosGetImage(value, page);
-        if (!data.hits.length) {
-          this.setState({ status: FETCH_STATUS.Rejected, images: [] });
-          return Notify.info('There are no images with this search string');
-        }
-
-        this.setState({
-          images: [...data.hits],
-          status: FETCH_STATUS.Resolved,
-          page: 1,
-          query: value,
-          totalPages: Math.ceil(data.totalHits / 15),
-        });
-      } catch (error) {
-        this.setState({ status: FETCH_STATUS.Rejected });
-      }
-    } else {
-      this.setState({ status: FETCH_STATUS.Rejected });
-      Notify.warning('Please enter a valid search string');
+    if (!value) {
+      return Notify.warning("The search string can't be an empty");
     }
+    this.setState({
+      query: value,
+      currentPage: 1,
+      images: [],
+    });
   };
 
   handleLoadMore = () => {
@@ -92,21 +78,14 @@ export default class App extends Component {
   };
 
   render() {
-    const { formSubmitHandler, handleLoadMore, handleToggleModal } = this;
-    const { images, status, isOpenModal, activePhoto, totalPages, page } =
-      this.state;
+    const { formSubmitHandler, handleLoadMore } = this;
+    const { images, status, totalPages, page } = this.state;
     return (
       <>
         <Searchbar formSubmitHandler={formSubmitHandler} />
         {(status === FETCH_STATUS.Resolved || page > 1) && (
           <>
-            <ImageGallery imagesList={images} onOpenModal={handleToggleModal} />
-            {isOpenModal && (
-              <Modal
-                modalPhoto={activePhoto}
-                onToggleModal={handleToggleModal}
-              />
-            )}
+            <ImageGallery imagesList={images} />
           </>
         )}
 
@@ -118,16 +97,7 @@ export default class App extends Component {
 
         {status === FETCH_STATUS.Pending && (
           <div className={css.loader}>
-            <ThreeDots
-              height="80"
-              width="80"
-              radius="9"
-              color="#3f51b5"
-              ariaLabel="three-dots-loading"
-              wrapperStyle={{}}
-              wrapperClassName=""
-              visible={true}
-            />
+            <Loader />
           </div>
         )}
 
@@ -135,9 +105,7 @@ export default class App extends Component {
           page !== totalPages &&
           images.length !== 0 && (
             <div className={css.btnLoadMoreWrapper}>
-              <Button ref={this.listRef} onLoadMore={handleLoadMore}>
-                Load More
-              </Button>
+              <Button onLoadMore={handleLoadMore}>Load More</Button>
               <div ref={this.imagesBlockRef} />
             </div>
           )}

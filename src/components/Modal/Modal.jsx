@@ -1,16 +1,16 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import css from './Modal.module.css';
+import { createPortal } from 'react-dom';
 
+const modalRoot = document.querySelector('#modal-root');
 export default class Modal extends Component {
   componentDidMount() {
     window.addEventListener('keydown', this.handleKeyDown);
-    document.body.style.overflow = 'hidden';
   }
 
   componentWillUnmount() {
     window.removeEventListener('keydown', this.handleKeyDown);
-    document.body.style.overflow = 'auto';
   }
 
   handleKeyDown = e => {
@@ -25,19 +25,19 @@ export default class Modal extends Component {
   };
 
   render() {
-    const { modalPhoto } = this.props;
+    const { largeImageURL } = this.props;
     const { handleBackdropClick } = this;
-    return (
+    return createPortal(
       <div className={css.Overlay} onClick={handleBackdropClick}>
         <div className={css.Modal}>
-          <img src={modalPhoto} alt="" />
+          <img src={largeImageURL} alt="" />
         </div>
-      </div>
+      </div>,
+      modalRoot
     );
   }
 }
 
 Modal.propTypes = {
-  modalPhoto: PropTypes.string.isRequired,
-  onToggleModal: PropTypes.func.isRequired,
+  largeImageURL: PropTypes.string.isRequired,
 };

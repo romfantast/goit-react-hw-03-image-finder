@@ -11,10 +11,11 @@ export default class Searchbar extends Component {
     this.setState({ value: value });
   };
   handlerSubmitForm = e => {
+    e.preventDefault();
     const { value } = this.state;
     const { formSubmitHandler } = this.props;
-    e.preventDefault();
     formSubmitHandler(value);
+    this.setState({ value: '' });
   };
 
   render() {

@@ -62,9 +62,11 @@ export default class App extends Component {
     if (!value) {
       return Notify.warning("The search string can't be an empty");
     }
+    if (value === this.state.query)
+      return Notify.info('There are your last search results');
     this.setState({
       query: value,
-      currentPage: 1,
+      page: 1,
       images: [],
     });
   };
